@@ -34,21 +34,21 @@ class Turtle:
     # Input: Pattern Type and turtle number
     # Output: cmd_vel for given turtle
     def motionPlanner(self):
-        if (self.turtleID == 0):
+        if (self.motionPath == 0):
             self.velMsg.linear.x = 1.0
             self.velMsg.linear.y = 0.0
             self.velMsg.linear.z = 0.0
             self.velMsg.angular.x = 0.0
             self.velMsg.angular.y = 0.0
             self.velMsg.angular.z = 0.0
-        elif (self.turtleID == 1):
+        elif (self.motionPath == 1):
             self.velMsg.linear.x = 10.0
             self.velMsg.linear.y = -10.0
             self.velMsg.linear.z = 0.0
             self.velMsg.angular.x = 0.0
             self.velMsg.angular.y = 0.0
             self.velMsg.angular.z = 10.0
-        elif (self.turtleID == 4):    
+        elif (self.motionPath == 4):    
             self.velMsg.linear.x = random.random() * 20
             self.velMsg.linear.y = random.random() * 20
             self.velMsg.linear.z = random.random() * 20
