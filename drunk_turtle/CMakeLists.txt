@@ -19,8 +19,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+#catkin_python_setup()
 
+#catkin_install_python(PROGRAMS bin/drunken_turtles
+#    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
@@ -121,7 +123,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/drunk_turtle.cpp
+#   src/drunk_turtle/drunken_turtles.py
 # )
 
 ## Add cmake target dependencies of the library
@@ -132,7 +134,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/drunk_turtle_node.cpp)
+# add_executable(drunken_turtles src/drunken_turtles.py)
+# target_link_libraries(drunken_turtles ${catkin_LIBRARIES} drunk_turtle)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
