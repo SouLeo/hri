@@ -15,25 +15,29 @@ class DrunkTurtle:
         self.pose = Pose()
         self.isTeleop = False
 
-    # Function: setPose
-    # Description: Sets the turtlesim's pose
-    # Input: x,y,theta
-    # Output: respawn turtlesim at location
-    def setPose(self,x,y,theta):
+    def setPose(self,x,y,theta): 
+    """
+    Function: setPose
+    Description: Sets the turtlesim's pose
+    Input: x,y,theta
+    Output: respawn turtlesim at location
+    """
         self.pose.x = x
         self.pose.y = y
         self.pose.theta = theta
 
-    # Function: motionPlanner
-    # Description:  Contains algorithms for navigating in
-    #       1. Straight Line
-    #       2. Circle
-    #       3. Lawn Mower Pattern
-    #       4. Going to Point
-    #       5. Random
-    # Input: Pattern Type and turtle number
-    # Output: cmd_vel for given turtle
     def motionPlanner(self):
+    """
+    Function: motionPlanner
+    Description:  Contains algorithms for navigating in
+          1. Straight Line
+          2. Circle
+          3. Lawn Mower Pattern
+          4. Going to Point
+          5. Random
+    Input: Pattern Type and turtle number
+    Output: cmd_vel for given turtle
+    """    
         if (self.motionPath == 0):
             self.velMsg.linear.x = 1.0
             self.velMsg.linear.y = 0.0
