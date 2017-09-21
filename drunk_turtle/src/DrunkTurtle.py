@@ -1,31 +1,36 @@
 #!/usr/bin/env python
 import rospy
 import random
-from math import pi
+from math import pi, sqrt, atan2
 from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
+from turtlesim.srv import TeleportAbsolute
 
 class DrunkTurtle:
     def __init__(self, turtleNum, pattern):
         self.motionPath = pattern
         self.turtleID = turtleNum
-        self.velocityTopic = '/turtle' + str(self.turtleID) + '/cmd_vel'
-        self.poseTopic = '/turtle' + str(self.turtleID) + '/pose'
-        self.velocityPublisher = rospy.Publisher(self.velocityTopic, Twist, queue_size = 10)
-        self.poseSubscriber = rosy.Subscriber(self.poseTopic, Pose, self.poseCallback)
-        self.posePublisher = rospy.Publisher(self.poseTopic, Pose, queue_size = 10)
+        self.isTeleop = False
+        self.distanceTolerance = 2
+        
+        # ROS Object Construction 
         self.velMsg = Twist()
         self.pose = Pose()
         self.goalPose = Pose()
-        self.rate = rospyRate(10)
-        self.isTeleop = False
-        self.distanceTolerance = 2
+
+        # ROS Topic Publishers and Subscribers
+        self.velocityTopic = '/turtle' + str(self.turtleID) + '/cmd_vel'
+        self.poseTopic = '/turtle' + str(self.turtleID) + '/pose'
+        self.velocityPublisher = rospy.Publisher(self.velocityTopic, Twist, queue_size = 10)
+        self.poseSubscriber = rospy.Subscriber(self.poseTopic, Pose, self.poseCallback)
+        self.posePublisher = rospy.Publisher(self.poseTopic, Pose, queue_size = 10) 
+        self.rate = rospy.Rate(10)
 
     def poseCallback(self, data):
     # Function: poseCallback
-    # Description: Updates the actual pose of the turtlesim
-    # Input: Current Pose
-    # Output: Updates Current Pose for turtle
+    # Description: updates the actual pose of the turtlesim
+    # Input: current uose
+    # Output: updates current pose for turtle
         self.pose = data
         self.pose.x = round(self.pose.x, 4)
         self.pose.y = round(self.pose.y, 4)
@@ -36,17 +41,19 @@ class DrunkTurtle:
 
     def setPose(self,x,y,theta): #TODO: TEST THAT PUBLISHER WORKS 
     # Function: setPose
-    # Description: Sets the turtlesim's pose
+    # Description: sets the turtlesim's pose
     # Input: x,y,theta
     # Output: respawn turtlesim at location
         self.pose.x = x
         self.pose.y = y
         self.pose.theta = theta
-        self.posePublisher.publish(self.pose)
+        rospy.wait_for_service('turtle' + str(self.turtleID) + '/teleport_absolute')
+        teleportTurtle = rospy.ServiceProxy('turtle' + str(self.turtleID) + '/teleport_absolute', TeleportAbsolute)
+        teleportTurtle(x, y, theta)
 
     def setGoalPose(self,x,y,theta):
     # Function: setGoalPose
-    # Description: Sets the turtlesim's goal pose
+    # Description: sets the turtlesim's goal pose
     # Output: sets the turtlesim's end goal location
         self.goalPose.x = x
         self.goalPose.y = y
@@ -80,18 +87,18 @@ class DrunkTurtle:
             self.velMsg.angular.y = 0.0
             self.velMsg.angular.z = 10.0
         
-        elif (self.motionPath == 3): # TODO: Test and verify this works
+        elif (self.motionPath == 3): 
         # Turtlesim moves toward a goal pose
             while sqrt(pow((self.goalPose.x - self.pose.x), 2) + pow((self.goalPose.y - self.pose.y), 2)) >= self.distanceTolerance:
                 # linear correction along x axis
-                self.velMsg.linear.x = 1.5 * sqrt(pow((goal_pose.x - self.pose.x), 2) + pow((goal_pose.y - self.pose.y), 2))
+                self.velMsg.linear.x = 1.5 * sqrt(pow((self.goalPose.x - self.pose.x), 2) + pow((self.goalPose.y - self.pose.y), 2))
                 self.velMsg.linear.y = 0
                 self.velMsg.linear.z = 0
                 
                 # angular correction around z axis
                 self.velMsg.angular.x = 0 
                 self.velMsg.angular.y = 0
-                self.velMsg.angular.z = 4 * (atan2(goal_pose.y - self.pose.y, goal_pose.x - self.pose.x) - self.pose.theta)
+                self.velMsg.angular.z = 4 * (atan2(self.goalPose.y - self.pose.y, self.goalPose.x - self.pose.x) - self.pose.theta)
                
                 # update
                 self.velocityPublisher.publish(self.velMsg)
@@ -115,8 +122,9 @@ class DrunkTurtle:
 if __name__ == '__main__':
     try: 
         rospy.init_node('drunken_turtles', anonymous = True)
-        drunkTurtle = DrunkTurtle(1,4)
-        drunkTurtle.setPose(40,20,3)
+        drunkTurtle = DrunkTurtle(1,3)
+        drunkTurtle.setGoalPose(5,9,3)
+        drunkTurtle.setPose(20,5,5)
         while not rospy.is_shutdown():
             drunkTurtle.motionPlanner()
             drunkTurtle.velocityPublisher.publish(drunkTurtle.velMsg)
