@@ -43,7 +43,7 @@ class DrunkTurtle:
         distance = sqrt(pow((self.goalPose.x - self.pose.x), 2) + pow((self.goalPose.y - self.pose.y), 2)) 
         return distance
 
-    def setPose(self,x,y,theta): #TODO: TEST THAT PUBLISHER WORKS 
+    def setPose(self,x,y,theta): 
     # Function: setPose
     # Description: sets the turtlesim's pose
     # Input: x,y,theta
