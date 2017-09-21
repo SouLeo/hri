@@ -29,13 +29,17 @@ class DrunkTurtle:
     def poseCallback(self, data):
     # Function: poseCallback
     # Description: updates the actual pose of the turtlesim
-    # Input: current uose
+    # Input: current pose
     # Output: updates current pose for turtle
         self.pose = data
         self.pose.x = round(self.pose.x, 4)
         self.pose.y = round(self.pose.y, 4)
 
     def getDistanceError(self):
+    # Function: getDistanceError
+    # Description: determines how far our turtle is from its goal pose
+    # Input: none, but gets currentPose data from turtle's member variables
+    # Output: returns the distance between the turtle and the goal pose
         distance = sqrt(pow((self.goalPose.x - self.pose.x), 2) + pow((self.goalPose.y - self.pose.y), 2)) 
         return distance
 
@@ -61,13 +65,13 @@ class DrunkTurtle:
 
     def motionPlanner(self):
     # Function: motionPlanner
-    # Description:  Contains algorithms for navigating in
-    #      1. Straight Line
-    #      2. Circle
-    #      3. Lawn Mower Pattern
-    #      4. Going to Point
-    #      5. Random
-    # Input: Pattern Type and turtle number
+    # Description:  contains algorithms for navigating in
+    #      1. straight line
+    #      2. circle
+    #      3. lawn mower pattern
+    #      4. go to goal
+    #      5. random
+    # Input: pattern type and turtle number
     # Output: cmd_vel for given turtle
         if (self.motionPath == 0):
         # Turtlesim moves in straight line
@@ -94,12 +98,10 @@ class DrunkTurtle:
                 self.velMsg.linear.x = 1.5 * sqrt(pow((self.goalPose.x - self.pose.x), 2) + pow((self.goalPose.y - self.pose.y), 2))
                 self.velMsg.linear.y = 0
                 self.velMsg.linear.z = 0
-                
                 # angular correction around z axis
                 self.velMsg.angular.x = 0 
                 self.velMsg.angular.y = 0
                 self.velMsg.angular.z = 4 * (atan2(self.goalPose.y - self.pose.y, self.goalPose.x - self.pose.x) - self.pose.theta)
-               
                 # update
                 self.velocityPublisher.publish(self.velMsg)
                 self.rate.sleep()
