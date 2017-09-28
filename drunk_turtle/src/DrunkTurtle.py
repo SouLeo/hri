@@ -5,13 +5,17 @@ from math import pi, sqrt, atan2
 from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
 from turtlesim.srv import TeleportAbsolute
+from turtlesim.srv import Spawn
 
 class DrunkTurtle(object):
-    def __init__(self, turtleNum, pattern):
+    def __init__(self, turtleNum, pattern, x, y, th):
         self.motionPath = pattern
         self.turtleID = turtleNum
         self.isTeleop = False
         self.distanceTolerance = 2
+        
+        spawnTurtle = rospy.ServiceProxy('spawn', Spawn)
+        spawnTurtle(x, y, th, 'turtle' + str(self.turtleID))
         
         # ROS Object Construction 
         self.velMsg = Twist()
@@ -83,6 +87,7 @@ class DrunkTurtle(object):
             self.velMsg.angular.x = 0.0
             self.velMsg.angular.y = 0.0
             self.velMsg.angular.z = 0.0
+            self.velocityPublisher.publish(self.velMsg)
         
         elif (self.motionPath == 1):
         # Turtlesim moves in circle
@@ -92,6 +97,7 @@ class DrunkTurtle(object):
             self.velMsg.angular.x = 0.0
             self.velMsg.angular.y = 0.0
             self.velMsg.angular.z = 10.0
+            self.velocityPublisher.publish(self.velMsg)
         
         elif (self.motionPath == 3): 
         # Turtlesim moves toward a goal pose
@@ -122,6 +128,7 @@ class DrunkTurtle(object):
                 self.velMsg.angular.z = random.random() * 5 * pi
             else:
                 self.velMsg.angular.z = random.random() * -5 * pi
+            self.velocityPublisher.publish(self.velMsg)
 
         elif (self.motionPath == 5): 
             self.velMsg.linear.x = 0 
@@ -130,11 +137,12 @@ class DrunkTurtle(object):
             self.velMsg.angular.x = 0 
             self.velMsg.angular.y = 0
             self.velMsg.angular.z = 0
+            self.velocityPublisher.publish(self.velMsg)
 
 if __name__ == '__main__':
     try: 
         rospy.init_node('drunken_turtles', anonymous = True)
-        drunkTurtle = DrunkTurtle(1,4)
+        drunkTurtle = DrunkTurtle(2,4)
         while not rospy.is_shutdown():
             pass
     except rospy.ROSInterruptException: pass

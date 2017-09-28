@@ -3,8 +3,8 @@ import rospy
 from DrunkTurtle import DrunkTurtle
 
 class PedestrianTurtle(DrunkTurtle):
-    def __init__(self, turtleNum, pattern, isFriend, radius):
-        super(PedestrianTurtle, self).__init__(turtleNum, pattern)  
+    def __init__(self, turtleNum, pattern, x, y, th, isFriend, radius):
+        super(PedestrianTurtle, self).__init__(turtleNum, pattern, x, y, th)  
         self.isFriend = isFriend
         self.radius = radius
 
@@ -30,8 +30,9 @@ class PedestrianTurtle(DrunkTurtle):
 if __name__ == '__main__':
     try: 
         rospy.init_node('pedestrian_turtles', anonymous = True)
-        friend = PedestrianTurtle(1,4,True,3)
-        foe = PedestrianTurtle(1,4,False,5)
+        friend = PedestrianTurtle(2, 4, 5, 5, 0, True, 3)
+        foe = PedestrianTurtle(3, 4, 8, 8, 0,False, 5)
         while not rospy.is_shutdown():
-            pass
+            friend.motionPlanner()
+            foe.motionPlanner()
     except rospy.ROSInterruptException: pass
