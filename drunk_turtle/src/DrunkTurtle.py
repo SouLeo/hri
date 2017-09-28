@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
 from turtlesim.srv import TeleportAbsolute
 
-class DrunkTurtle:
+class DrunkTurtle(object):
     def __init__(self, turtleNum, pattern):
         self.motionPath = pattern
         self.turtleID = turtleNum
@@ -25,6 +25,7 @@ class DrunkTurtle:
         self.poseSubscriber = rospy.Subscriber(self.poseTopic, Pose, self.poseCallback)
         self.posePublisher = rospy.Publisher(self.poseTopic, Pose, queue_size = 10) 
         self.rate = rospy.Rate(10)
+        self.motionPlanner()
 
     def poseCallback(self, data):
     # Function: poseCallback
@@ -71,6 +72,7 @@ class DrunkTurtle:
     #      3. lawn mower pattern
     #      4. go to goal
     #      5. random
+    #      6. stationary
     # Input: pattern type and turtle number
     # Output: cmd_vel for given turtle
         if (self.motionPath == 0):
@@ -119,15 +121,20 @@ class DrunkTurtle:
             if (random.random() < 0.5):
                 self.velMsg.angular.z = random.random() * 5 * pi
             else:
-                self.velMsg.angular.z = random.random() * -5 * pi    
+                self.velMsg.angular.z = random.random() * -5 * pi
+
+        elif (self.motionPath == 5): 
+            self.velMsg.linear.x = 0 
+            self.velMsg.linear.y = 0
+            self.velMsg.linear.z = 0
+            self.velMsg.angular.x = 0 
+            self.velMsg.angular.y = 0
+            self.velMsg.angular.z = 0
 
 if __name__ == '__main__':
     try: 
         rospy.init_node('drunken_turtles', anonymous = True)
-        drunkTurtle = DrunkTurtle(1,3)
-        drunkTurtle.setGoalPose(5,9,3)
-        drunkTurtle.setPose(20,5,5)
+        drunkTurtle = DrunkTurtle(1,4)
         while not rospy.is_shutdown():
-            drunkTurtle.motionPlanner()
-            drunkTurtle.velocityPublisher.publish(drunkTurtle.velMsg)
+            pass
     except rospy.ROSInterruptException: pass
