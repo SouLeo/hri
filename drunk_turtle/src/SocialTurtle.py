@@ -32,7 +32,6 @@ class SocialTurtle(DrunkTurtle):
     if __name__ == '__main__':
         rospy.init_node('social_turtle', anonymous = True)
         # Kill current turtle #1
-        rospy.wait_for_service('turtle1/kill')
         killTurtle = rospy.ServiceProxy('kill', Kill)
         killTurtle('turtle1')
         socialTurtle = SocialTurtle(3,3,0)

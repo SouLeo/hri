@@ -29,6 +29,8 @@ class DrunkTurtle(object):
         self.poseSubscriber = rospy.Subscriber(self.poseTopic, Pose, self.poseCallback)
         self.posePublisher = rospy.Publisher(self.poseTopic, Pose, queue_size = 10) 
         self.rate = rospy.Rate(10)
+        
+        # Turtle Motion Begins
         self.motionPlanner()
 
     def poseCallback(self, data):

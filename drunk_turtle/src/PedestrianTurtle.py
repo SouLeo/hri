@@ -15,23 +15,11 @@ class PedestrianTurtle(DrunkTurtle):
         # Output: Sets values surrounding turtle (to prevent other turtles from
         # encroaching on its personal space)
 
-#    def motionPlanner(self, isMoving):
-        # Function: motionPlanner
-        # Description: contains an algorithm for pedestrian turtles
-        # Input: Boolean to determine if pedestrian will be static or dynamic
-        # Output: 
-        #   1) If static, the turtle will remain in its spawn location
-        #   2) If dynamic, the turtle will move in a confined area
- #       if (isMoving == True):
-            # set a bounding box for turtle to randomly move in
-#        else (isMoving == False):
-            # set spawn location for turtle
-
 if __name__ == '__main__':
     try: 
         rospy.init_node('pedestrian_turtles', anonymous = True)
         friend = PedestrianTurtle(2, 4, 5, 5, 0, True, 3)
-        foe = PedestrianTurtle(3, 4, 8, 8, 0,False, 5)
+        foe = PedestrianTurtle(3, 4, 8, 8, 0, False, 5)
         while not rospy.is_shutdown():
             friend.motionPlanner()
             foe.motionPlanner()
