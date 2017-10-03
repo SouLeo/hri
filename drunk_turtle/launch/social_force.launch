@@ -1,0 +1,34 @@
+<launch>
+    <node
+        name    = "PedestrianTurtle"
+        pkg     = "drunk_turtle"
+        type    = "PedestrianTurtle.py"
+        args    = ""
+
+        respawn = "false"
+        output  = "screen"
+    />
+
+    <node
+        name    = "SocialTurtle"
+        pkg     = "drunk_turtle"
+        type    = "SocialTurtle.py"
+        args    = ""
+
+        respawn = "false"
+        output  = "screen"
+    />
+
+
+    <node
+        name    = "turtlesim_node"
+        pkg     = "turtlesim"
+        type    = "turtlesim_node"
+        args    = ""
+
+        respawn = "false"
+        output  = "screen"
+    />
+
+
+</launch>

@@ -140,6 +140,9 @@ class DrunkTurtle(object):
             self.velMsg.angular.y = 0
             self.velMsg.angular.z = 0
             self.velocityPublisher.publish(self.velMsg)
+        
+        elif (self.motionPath == 6): 
+            pass 
 
 if __name__ == '__main__':
     try: 
