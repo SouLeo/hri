@@ -33,9 +33,6 @@ class SocialTurtle(DrunkTurtle):
         yFo = pedTurtlePoses[5]
 
  
-        if sqrt(pow((xFr - xSo), 2) + pow((yFr - ySo), 2)) <= 15:
-            self.velMsg.linear.x = 1.5 * sqrt(pow((xFr - xSo), 2) + pow((yFr - ySo), 2)) - 0.2 * sqrt(pow((xFo - xSo), 2) + pow((yFo - ySo), 2))
-            self.velMsg.angular.z = 4 * (atan2(yFr - ySo, xFr - xSo) - self.pose.theta) - 0.1 * (atan2(yFo - ySo, xFo - xSo) - self.pose.theta)
         if sqrt(pow((xFo - xSo), 2) + pow((yFo - ySo), 2)) <= 5:
             self.velMsg.linear.x = 0.2 * sqrt(pow((xFr - xSo), 2) + pow((yFr - ySo), 2)) - 1.5 * sqrt(pow((xFo - xSo), 2) + pow((yFo - ySo), 2))
             self.velMsg.angular.z = 0.1 * (atan2(yFr - ySo, xFr - xSo) - self.pose.theta) - 4 * (atan2(yFo - ySo, xFo - xSo) - self.pose.theta)
