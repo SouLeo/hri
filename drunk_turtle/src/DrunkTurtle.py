@@ -2,10 +2,12 @@
 import rospy
 import random
 from math import pi, sqrt, atan2
+from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
 from turtlesim.srv import TeleportAbsolute
 from turtlesim.srv import Spawn
+from turtlesim.srv import Kill
 
 class DrunkTurtle(object):
     def __init__(self, turtleNum, pattern, x, y, th):
@@ -144,10 +146,25 @@ class DrunkTurtle(object):
         elif (self.motionPath == 6): 
             pass 
 
+def callback(data):
+    if (data.data == "FORWARD"):
+        # cmd_vel publish
+    elif (data.data == "BACKWARD"):
+        # cmd_vel publish
+
 if __name__ == '__main__':
     try: 
         rospy.init_node('drunken_turtles', anonymous = True)
-        drunkTurtle = DrunkTurtle(2,4)
+        
+        # Kill the starting turtle
+        rospy.wait_for_service('kill')
+        killTurtle = rospy.ServiceProxy('kill', Kill)
+        killTurtle('turtle1')
+
+        # Subscribe to /pocketsphinx_recognizer/output
+        psSub = rospy.Subscriber("/pocketsphinx_recognizer/output", String, callback)
+        
+        drunkTurtle = DrunkTurtle(1,6,5,5,5)
         while not rospy.is_shutdown():
-            pass
+            drunkTurtle.motionPlanner()
     except rospy.ROSInterruptException: pass

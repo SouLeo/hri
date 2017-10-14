@@ -1,0 +1,34 @@
+<launch>
+
+    <arg name="_dict" value="_dict:=$(find pocketsphinx)/vocab/voice_cmd.dic" />
+    <arg name="_kws" value="_kws:=$(find pocketsphinx)/vocab/voice_cmd.kwlist" />
+
+    <node
+        name    = "pocketsphinx_recognizer"
+        pkg     = "pocketsphinx"
+        type    = "recognizer.py"
+        args    = "$(arg _dict) $(arg _kws)"
+    />
+
+    <node
+        name    = "DrunkTurtle"
+        pkg     = "drunk_turtle"
+        type    = "DrunkTurtle.py"
+        args    = ""
+
+        respawn = "false"
+        output  = "screen"
+    />
+
+    <node
+        name    = "turtlesim_node"
+        pkg     = "turtlesim"
+        type    = "turtlesim_node"
+        args    = ""
+
+        respawn = "false"
+        output  = "screen"
+    />
+
+
+</launch>
