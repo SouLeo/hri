@@ -147,10 +147,20 @@ class DrunkTurtle(object):
             pass 
 
 def callback(data):
-    if (data.data == "FORWARD"):
-        # cmd_vel publish
-    elif (data.data == "BACKWARD"):
-        # cmd_vel publish
+    velocity = Twist()
+    if "forward" in data.data:
+        rospy.loginfo("forward")
+        velocity.linear.x = 1.0
+        pub.publish(velocity)
+    elif "backward" in data.data:
+        rospy.loginfo("backward")
+        velocity.linear.x = -1.0
+        pub.publish(velocity)
+    else:
+        rospy.loginfo("nada heard")
+        rospy.loginfo("%s", data.data)
+        velocity.linear.x = 0.0
+        pub.publish(velocity)
 
 if __name__ == '__main__':
     try: 
@@ -162,8 +172,10 @@ if __name__ == '__main__':
         killTurtle('turtle1')
 
         # Subscribe to /pocketsphinx_recognizer/output
-        psSub = rospy.Subscriber("/pocketsphinx_recognizer/output", String, callback)
-        
+        psSub = rospy.Subscriber('/pocketsphinx_recognizer/output', String, callback)
+        pub = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size = 10)
+
+
         drunkTurtle = DrunkTurtle(1,6,5,5,5)
         while not rospy.is_shutdown():
             drunkTurtle.motionPlanner()
