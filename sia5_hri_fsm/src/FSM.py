@@ -89,10 +89,15 @@ class GiveBlock(smach.State):
     def execute(self, userdata):
         rospy.loginfo('Executing Give Block State')
 
+def is_block_placed_cb():
+    rospy.loginfo('block has been placed!')
+    sm.userdata.sm_is_block_placed = data.data 
+
 def main():
     # Set up ROS functionality
     rospy.init_node('sia5_fsm')
-    # Add publisher and subscribers
+    # ROS publisher and subscribers
+    rospy.Subscriber('is_block_placed', Bool, is_block_placed_cb)
 
     # State Machine Setup
     global sm
@@ -100,18 +105,17 @@ def main():
     rospy.loginfo('SM defined')
 
     # Initialize state machine variables
-    sm.userdata.is_block_placed_in = False
-    sm.userdata.is_block_placed_out = False
-    sm.userdata.is_pattern_known = False
-    sm.userdata.next_block = ''
+    sm.userdata.sm_is_block_placed = False
+    sm.userdata.sm_is_pattern_known = False
+    sm.userdata.sm_next_block = ''
 
     with sm:
         # Add states to container
         # TODO: create ROS publishers and subscribers to map to variables needed
         # to remap
-        smach.StateMachine.add('OBSERVE', Observe(), transitions={'give_block':'GIVEBLOCK','examine_puzzle':'EXAMINEPUZZLE'}, remapping={})
-        smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(), transitions={'give_next_block':'GIVEBLOCK'}, remapping={})
-        smach.StateMachine.add('GIVEBLOCK', GiveBlock(), transitions={'observe':'OBSERVE'}, remapping={})
+        smach.StateMachine.add('OBSERVE', Observe(), transitions={'give_block':'GIVEBLOCK','examine_puzzle':'EXAMINEPUZZLE'}, remapping={'is_block_placed_in':'sm_is_block_placed', 'is_block_placed_out':'sm_is_block_placed', 'is_pattern_known':'sm_is_pattern_known'})
+        smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(), transitions={'give_next_block':'GIVEBLOCK'}, remapping={'is_block_placed_out':'sm_is_block_placed','is_pattern_known':'sm_is_pattern_known', 'next_block':'sm_next_block' })
+        smach.StateMachine.add('GIVEBLOCK', GiveBlock(), transitions={'observe':'OBSERVE'}, remapping={'is_pattern_known':'sm_is_pattern_known','next_block':'sm_next_block', 'is_block_placed)in':'sm_is_block_placed'})
 
     outcome = sm.execute()
 
