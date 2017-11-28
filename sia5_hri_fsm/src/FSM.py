@@ -10,6 +10,22 @@ from std_msgs.msg import Bool, Int32
 
 TIMEOUT_SECS = 30
 
+def createPatterns():
+    possible_patterns = []
+    possible_patterns.append("rrgygy")
+    possible_patterns.append("rryygb")
+    possible_patterns.append("rybygg")
+    possible_patterns.append("rybyrb")
+    possible_patterns.append("yyyyrb")
+    possible_patterns.append("yyyygg")
+    possible_patterns.append("gbrrby")
+    possible_patterns.append("ggrrby")
+    possible_patterns.append("bbggry")
+    possible_patterns.append("bbggrb")
+    possible_patterns.append("bgbgby")
+    possible_patterns.append("bgbrby")
+    return possible_patterns
+
 def comparePattern(currentPattern, possiblePatterns):
     # Function: comparePattern
     # Description: compares currently viewed pattern against possible soln's
@@ -65,29 +81,31 @@ class ExaminePuzzle(smach.State):
         rospy.loginfo('Executing Examine Puzzle State')
         # TODO: rosservice call that reports block sequence into a string and
         # report into currentPattern
+        currentPattern = 'roybiv'   # example pattern. replace with a rosservice that determines what blocks are shown
         possiblePatterns = comparePattern(currentPattern, possiblePatterns)
         numSolns = len(possiblePatterns)
         if nextBlock(possiblePatterns) != '0':
             userdata.next_block = nextBlock(possiblePatterns) # Write the next likely block
+            # TODO: check to see if user has a block in his/her workspace. i.e.
+            # do we need to go to give block?
         else:
             rospy.logerr('WHOOPSIES, we indexed out of bound in the nextBlock() function!!!')
         if (numSolns == 1):
             rospy.loginfo('Pattern Known!! :D')
             userdata.is_pattern_known = True
-            return 'give_block'
         else:
             rospy.loginfo('Pattern still unknown.' + numSolns + 'possibilities')
             userdata.is_pattern_known = False
-            return 'give_block'
+        return 'give_block'
 
 class GiveBlock(smach.State):
     # TODO: this state involves placing a block in the handover zone, the robot
-    # should check if the next block to be given is already in the user's space
     def __init__(self):
         smach.State.__init__(self, outcomes=['observe'], input_keys=['is_pattern_known', 'next_block'], output_keys=['is_block_placed_in'])
 
     def execute(self, userdata):
         rospy.loginfo('Executing Give Block State')
+        # TODO: rosservice call to place a the next block in the drop off zone
         return 'observe'
 
 def is_block_placed_cb():
@@ -109,7 +127,8 @@ def main():
     sm.userdata.sm_is_block_placed = False
     sm.userdata.sm_is_pattern_known = False
     sm.userdata.sm_next_block = ''
-
+    sm.userdata.sm_possible_patterns = createPatterns()
+    
     with sm:
         # Add states to container
         # TODO: create ROS publishers and subscribers to map to variables needed
