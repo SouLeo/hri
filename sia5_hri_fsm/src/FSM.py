@@ -38,7 +38,7 @@ def nextBlock(possiblePatterns):
 
 class Observe(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['examine_puzzle','give_block'], input_keys=['is_block_placed_in, is_pattern_known'], output_keys=['is_block_placed_out'])
+        smach.State.__init__(self, outcomes=['examine_puzzle','give_block'], input_keys=['is_block_placed_in', 'is_pattern_known'], output_keys=['is_block_placed_out'])
 
     def execute(self, userdata):
         rospy.loginfo('Executing Observation State')
@@ -54,7 +54,7 @@ class Observe(smach.State):
         userdata.block_placed_out = True
         if userdata.is_pattern_known:
             return 'give_block'
-        else 
+        else: 
             return 'examine_puzzle'
 
 class ExaminePuzzle(smach.State):
@@ -88,6 +88,7 @@ class GiveBlock(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing Give Block State')
+        return 'observe'
 
 def is_block_placed_cb():
     rospy.loginfo('block has been placed!')
