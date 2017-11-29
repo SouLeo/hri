@@ -9,8 +9,13 @@ import smach_ros
 from std_msgs.msg import Bool, Int32
 
 TIMEOUT_SECS = 30
+possiblePatterns = []
 
 def createPatterns():
+    # Function: createPatterns
+    # Description: fills out all possible pattern solutions
+    # Input: none
+    # Output: all possible solutions
     possiblePatterns = []
     possiblePatterns.append("rrgygy")
     possiblePatterns.append("rryygb")
@@ -28,17 +33,16 @@ def createPatterns():
 
 def comparePattern(currentPattern, possiblePatterns):
     # Function: comparePattern
-    # Description: compares currently viewed pattern against possible soln's
+    # Description: compares currently viewed pattern against possible solutions
     # Input: currentPattern (string), possiblePatterns (list of strings)
-    # Output: is the final solution known? (int)
-    for i in len(possiblePatterns):
+    # Output: possible solutions  (list of strings)
+    if (len(possiblePatterns) <= 1):
+        rospy.loginfo('Pattern Known from comparePattern')
+        return possiblePatterns 
+    for i, pattern in enumerate(possiblePatterns):
         if currentPattern not in possiblePatterns[i]:
             possiblePatterns.pop(i)
-    if len(possiblePatterns == 1):
-        # Only one possible solution
-        return possiblePatterns
-    else:
-        return possiblePatterns
+    return possiblePatterns
 
 def nextBlock(possiblePatterns):
     # Function: nextBlock
@@ -50,6 +54,7 @@ def nextBlock(possiblePatterns):
     if (numBlocks + 1 <= 5):
         return firstpossiblePattern[numBlocks + 1] # return next character
     else:
+        rospy.logerr('Indexed out of bound in the nextBlock() function!!!')
         return '0' # end of sequence. Something went wrong
 
 class Observe(smach.State):
@@ -67,7 +72,7 @@ class Observe(smach.State):
             userdata.is_block_placed_out = False
             return 'give_block'
         rospy.loginfo('Block in place') 
-        userdata.block_placed_out = True
+        userdata.is_block_placed_out = True
         if userdata.is_pattern_known:
             return 'give_block'
         else: 
@@ -81,22 +86,21 @@ class ExaminePuzzle(smach.State):
         rospy.loginfo('Executing Examine Puzzle State')
         # TODO: rosservice call that reports block sequence into a string and
         # report into currentPattern
-        currentPattern = 'roybiv'   # example pattern. replace with a rosservice that determines what blocks are shown
+        currentPattern = 'rr'   # example pattern. replace with a rosservice that determines what blocks are shown
+        global possiblePatterns
         possiblePatterns = comparePattern(currentPattern, possiblePatterns)
         numSolns = len(possiblePatterns)
         if nextBlock(possiblePatterns) != '0':
             userdata.next_block = nextBlock(possiblePatterns) # Write the next likely block
             # TODO: check to see if user has a block in his/her workspace. i.e.
             # do we need to go to give block?
-        else:
-            rospy.logerr('WHOOPSIES, we indexed out of bound in the nextBlock() function!!!')
         if (numSolns == 1):
             rospy.loginfo('Pattern Known!! :D')
             userdata.is_pattern_known = True
         else:
-            rospy.loginfo('Pattern still unknown.' + numSolns + 'possibilities')
+            rospy.loginfo('Pattern still unknown.' + str(numSolns) + 'possibilities')
             userdata.is_pattern_known = False
-        return 'give_block'
+        return 'give_next_block'
 
 class GiveBlock(smach.State):
     # TODO: this state involves placing a block in the handover zone, the robot
@@ -108,14 +112,14 @@ class GiveBlock(smach.State):
         # TODO: rosservice call to place a the next block in the drop off zone
         return 'observe'
 
-def is_block_placed_cb():
+def is_block_placed_cb(data):
     rospy.loginfo('block has been placed!')
     sm.userdata.sm_is_block_placed = data.data 
 
 def main():
     # Set up ROS functionality
     rospy.init_node('sia5_fsm')
-    # ROS publisher and subscribers
+    # TODO: ROS publisher and subscribers
     rospy.Subscriber('is_block_placed', Bool, is_block_placed_cb)
 
     # State Machine Setup
@@ -127,12 +131,12 @@ def main():
     sm.userdata.sm_is_block_placed = False
     sm.userdata.sm_is_pattern_known = False
     sm.userdata.sm_next_block = ''
-    sm.userdata.sm_possible_patterns = createPatterns()
     
+    global possiblePatterns 
+    possiblePatterns = createPatterns()
+   
     with sm:
         # Add states to container
-        # TODO: create ROS publishers and subscribers to map to variables needed
-        # to remap
         smach.StateMachine.add('OBSERVE', Observe(), transitions={'give_block':'GIVEBLOCK','examine_puzzle':'EXAMINEPUZZLE'}, remapping={'is_block_placed_in':'sm_is_block_placed', 'is_block_placed_out':'sm_is_block_placed', 'is_pattern_known':'sm_is_pattern_known'})
         smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(), transitions={'give_next_block':'GIVEBLOCK'}, remapping={'is_block_placed_out':'sm_is_block_placed','is_pattern_known':'sm_is_pattern_known', 'next_block':'sm_next_block' })
         smach.StateMachine.add('GIVEBLOCK', GiveBlock(), transitions={'observe':'OBSERVE'}, remapping={'is_pattern_known':'sm_is_pattern_known','next_block':'sm_next_block', 'is_block_placed)in':'sm_is_block_placed'})
