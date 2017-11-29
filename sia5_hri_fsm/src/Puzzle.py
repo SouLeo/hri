@@ -53,7 +53,7 @@ def nextBlock(possiblePatterns, currentPattern):
         print "index out of bound"
         rospy.logerr('Indexed out of bound in the nextBlock() function!!!')
         return '0' # end of sequence. Something went wrong
-
+'''
 def main():
     possiblePatterns = []
     possiblePatterns = createPatterns()
@@ -64,3 +64,4 @@ def main():
 
 if  __name__ == '__main__':
     main()
+'''
