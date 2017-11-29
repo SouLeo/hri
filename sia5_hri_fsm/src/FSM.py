@@ -11,20 +11,20 @@ from std_msgs.msg import Bool, Int32
 TIMEOUT_SECS = 30
 
 def createPatterns():
-    possible_patterns = []
-    possible_patterns.append("rrgygy")
-    possible_patterns.append("rryygb")
-    possible_patterns.append("rybygg")
-    possible_patterns.append("rybyrb")
-    possible_patterns.append("yyyyrb")
-    possible_patterns.append("yyyygg")
-    possible_patterns.append("gbrrby")
-    possible_patterns.append("ggrrby")
-    possible_patterns.append("bbggry")
-    possible_patterns.append("bbggrb")
-    possible_patterns.append("bgbgby")
-    possible_patterns.append("bgbrby")
-    return possible_patterns
+    possiblePatterns = []
+    possiblePatterns.append("rrgygy")
+    possiblePatterns.append("rryygb")
+    possiblePatterns.append("rybygg")
+    possiblePatterns.append("rybyrb")
+    possiblePatterns.append("yyyyrb")
+    possiblePatterns.append("yyyygg")
+    possiblePatterns.append("gbrrby")
+    possiblePatterns.append("ggrrby")
+    possiblePatterns.append("bbggry")
+    possiblePatterns.append("bbggrb")
+    possiblePatterns.append("bgbgby")
+    possiblePatterns.append("bgbrby")
+    return possiblePatterns
 
 def comparePattern(currentPattern, possiblePatterns):
     # Function: comparePattern
@@ -137,7 +137,12 @@ def main():
         smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(), transitions={'give_next_block':'GIVEBLOCK'}, remapping={'is_block_placed_out':'sm_is_block_placed','is_pattern_known':'sm_is_pattern_known', 'next_block':'sm_next_block' })
         smach.StateMachine.add('GIVEBLOCK', GiveBlock(), transitions={'observe':'OBSERVE'}, remapping={'is_pattern_known':'sm_is_pattern_known','next_block':'sm_next_block', 'is_block_placed)in':'sm_is_block_placed'})
 
+    sis = smach_ros.IntrospectionServer('sia5_fsm', sm, '/SM_ROOT')
+    sis.start()
+
     outcome = sm.execute()
+    rospy.spin()
+    sis.stop()
 
 if __name__ == '__main__':
     main()
