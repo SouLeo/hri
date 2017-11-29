@@ -51,7 +51,7 @@ def nextBlock(possiblePatterns, currentPattern):
         return firstpossiblePattern[numBlocks + 1] # return next character
     else:
         print "index out of bound"
-        # rospy.logerr('Indexed out of bound in the nextBlock() function!!!')
+        rospy.logerr('Indexed out of bound in the nextBlock() function!!!')
         return '0' # end of sequence. Something went wrong
 
 def main():
