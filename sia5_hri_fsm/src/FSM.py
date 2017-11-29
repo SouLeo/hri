@@ -6,7 +6,7 @@ import roslib
 import rospy
 import smach
 import smach_ros
-from Puzzle import Puzzle
+from Puzzle import createPatterns, comparePattern, nextBlock
 from std_msgs.msg import Bool, Int32
 
 # TODO: Modularize FSM functionality.
