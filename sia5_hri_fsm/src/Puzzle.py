@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 # Maintainer: Selma Wanna, slwanna@utexas.edu
+import roslib
+import rospy
 
 def createPatterns():
     # Function: createPatterns
@@ -30,25 +32,35 @@ def comparePattern(currentPattern, possiblePatterns):
     if (len(possiblePatterns) <= 1):
         rospy.loginfo('Pattern Known from comparePattern')
         return possiblePatterns 
-    for i, pattern in enumerate(possiblePatterns):
-        if currentPattern not in possiblePatterns[i]:
-            possiblePatterns.pop(i)
-    return possiblePatterns
+    endIndex = len(possiblePatterns)
+    newPossibliities = []
+    for i in range (0, endIndex):
+        if possiblePatterns[i].startswith(currentPattern):
+            newPossibliities.append(possiblePatterns[i])
+    return newPossibliities
 
-def nextBlock(possiblePatterns):
+def nextBlock(possiblePatterns, currentPattern):
     # Function: nextBlock
     # Description: Chooses which block should be tried next
     # Input: currentPattern (string)
     # Output: block which should be tried next
     firstpossiblePattern = possiblePatterns[0]
-    numBlocks = len(firstpossiblePattern)
+    numBlocks = len(currentPattern)
     if (numBlocks + 1 <= 6):
+        print firstpossiblePattern[numBlocks]
         return firstpossiblePattern[numBlocks + 1] # return next character
     else:
-        rospy.logerr('Indexed out of bound in the nextBlock() function!!!')
+        print "index out of bound"
+        # rospy.logerr('Indexed out of bound in the nextBlock() function!!!')
         return '0' # end of sequence. Something went wrong
 
- def main():
+def main():
+    possiblePatterns = []
+    possiblePatterns = createPatterns()
+    currentPattern = 'rr'
+    possiblePatterns = comparePattern(currentPattern, possiblePatterns)
+    print possiblePatterns 
+    nextBlock(possiblePatterns, currentPattern)
 
- __name__ == '__main__':
+if  __name__ == '__main__':
     main()
