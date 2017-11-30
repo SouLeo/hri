@@ -2,7 +2,6 @@
 
 # Maintainer: Selma Wanna, slwanna@utexas.edu
 
-import roslib
 import rospy
 import smach
 import smach_ros
@@ -18,14 +17,15 @@ possiblePatterns = []
 
 class Observe(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['examine_puzzle'], input_keys=['is_block_placed_in'], output_keys=[''])
+        smach.State.__init__(self, outcomes=['examine_puzzle'],
+                             input_keys=['is_block_placed_in'], output_keys=[''])
 
     def execute(self, userdata):
         rospy.loginfo('Executing Observation State')
         global TIMEOUT_SECS
         timeout = rospy.Time.now() + rospy.Duration(TIMEOUT_SECS)
         while not userdata.is_block_placed_in and rospy.Time.now() <= timeout:
-            pass 
+            pass
         if not userdata.is_block_placed_in:
             rospy.loginfo('Timeout Occurred')
         else:
@@ -34,7 +34,9 @@ class Observe(smach.State):
 
 class ExaminePuzzle(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['give_next_block'], input_keys=['is_blocked_placed_out', 'is_pattern_known'], output_keys=['next_block'])
+        smach.State.__init__(self, outcomes=['give_next_block'],
+                             input_keys=['is_blocked_placed_out', 'is_pattern_known'],
+                             output_keys=['next_block'])
 
     def execute(self, userdata):
         rospy.loginfo('Executing Examine Puzzle State')
@@ -42,7 +44,7 @@ class ExaminePuzzle(smach.State):
         global NUMGUESSES
         # TODO: rosservice call that reports block sequence into a string and
         # report into currentPattern
-        currentPattern = 'rr'   # example pattern. replace with a rosservice that determines what blocks are shown
+        currentPattern = 'rr'   # replace with a rosservice that determines what blocks are shown
         if not userdata.is_pattern_known:
             possiblePatterns = comparePattern(currentPattern, possiblePatterns)
             numSolns = len(possiblePatterns)
@@ -67,7 +69,8 @@ class GiveBlock(smach.State):
     # this may turn into a service state type or an action state type. Talk w/
     # Christina
     def __init__(self):
-        smach.State.__init__(self, outcomes=['observe'], input_keys=['next_block'], output_keys=['is_block_placed_in'])
+        smach.State.__init__(self, outcomes=['observe'], input_keys=['next_block'],
+                             output_keys=['is_block_placed_in'])
 
     def execute(self, userdata):
         rospy.loginfo('Executing Give Block State')
@@ -106,9 +109,17 @@ def main():
 
     with sm:
         # Add states to container
-        smach.StateMachine.add('OBSERVE', Observe(), transitions={'examine_puzzle':'EXAMINEPUZZLE'}, remapping={'is_block_placed_in':'sm_is_block_placed'})
-        smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(), transitions={'give_next_block':'GIVEBLOCK'}, remapping={'is_block_placed_out':'sm_is_block_placed', 'is_pattern_known':'sm_is_pattern_known', 'next_block':'sm_next_block'})
-        smach.StateMachine.add('GIVEBLOCK', GiveBlock(), transitions={'observe':'OBSERVE'}, remapping={'is_pattern_known':'sm_is_pattern_known', 'next_block':'sm_next_block', 'is_block_placed_in':'sm_is_block_placed'})
+        smach.StateMachine.add('OBSERVE', Observe(), transitions={'examine_puzzle':'EXAMINEPUZZLE'},
+                               remapping={'is_block_placed_in':'sm_is_block_placed'})
+        smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(),
+                               transitions={'give_next_block':'GIVEBLOCK'},
+                               remapping={'is_block_placed_out':'sm_is_block_placed',
+                                          'is_pattern_known':'sm_is_pattern_known',
+                                          'next_block':'sm_next_block'})
+        smach.StateMachine.add('GIVEBLOCK', GiveBlock(), transitions={'observe':'OBSERVE'},
+                               remapping={'is_pattern_known':'sm_is_pattern_known',
+                                          'next_block':'sm_next_block',
+                                          'is_block_placed_in':'sm_is_block_placed'})
 
     sis = smach_ros.IntrospectionServer('sia5_fsm', sm, '/SM_ROOT')
     sis.start()
