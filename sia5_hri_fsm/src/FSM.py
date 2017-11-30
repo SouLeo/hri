@@ -41,7 +41,7 @@ class ExaminePuzzle(smach.State):
     def execute(self, userdata):
         rospy.loginfo('Executing Examine Puzzle State')
         global possiblePatterns
-        global NUMGUESSES
+        global NUMERRGUESS
         # TODO: rosservice call that reports block sequence into a string and
         # report into currentPattern
         currentPattern = 'rr'   # replace with a rosservice that determines what blocks are shown
