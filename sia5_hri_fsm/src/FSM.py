@@ -18,7 +18,8 @@ possiblePatterns = []
 class Observe(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['examine_puzzle'],
-                             input_keys=['is_block_placed_in'], output_keys=[''])
+                             input_keys=['is_block_placed_in'],
+                             output_keys=[''])
 
     def execute(self, userdata):
         rospy.loginfo('Executing Observation State')
@@ -68,7 +69,8 @@ class GiveBlock(smach.State):
     # this may turn into a service state type or an action state type. Talk w/
     # Christina
     def __init__(self):
-        smach.State.__init__(self, outcomes=['observe'], input_keys=['next_block'],
+        smach.State.__init__(self, outcomes=['observe'],
+                             input_keys=['next_block'],
                              output_keys=['is_block_placed_in'])
 
     def execute(self, userdata):
@@ -80,6 +82,7 @@ class GiveBlock(smach.State):
             # Place block
             # TODO: rosservice call to place a the next block in the drop off zone
             print 'lol'
+        # TODO: Visually check for updated puzzle
         return 'observe'
 
 def is_block_placed_cb(data):
