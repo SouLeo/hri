@@ -17,7 +17,8 @@ possiblePatterns = []
 
 class Observe(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['examine_puzzle'],
+        smach.State.__init__(self,
+                             outcomes=['examine_puzzle'],
                              input_keys=['is_block_placed_in'],
                              output_keys=[''])
 
@@ -34,7 +35,8 @@ class Observe(smach.State):
 
 class ExaminePuzzle(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['give_next_block'],
+        smach.State.__init__(self,
+                             outcomes=['give_next_block'],
                              input_keys=['is_blocked_placed_out', 'is_pattern_known'],
                              output_keys=['next_block'])
 
@@ -69,7 +71,8 @@ class GiveBlock(smach.State):
     # this may turn into a service state type or an action state type. Talk w/
     # Christina
     def __init__(self):
-        smach.State.__init__(self, outcomes=['observe'],
+        smach.State.__init__(self,
+                             outcomes=['observe'],
                              input_keys=['next_block'],
                              output_keys=['is_block_placed_in'])
 
