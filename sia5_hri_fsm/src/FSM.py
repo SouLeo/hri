@@ -18,6 +18,7 @@ from Puzzle import (create_patterns, create_starter_patterns,
                     compare_pattern, next_block, is_piece_available)
 from Block import get_pose
 from std_msgs.msg import Bool
+from sia5_hri_fsm.srv import Handover
 
 SM = None
 TIMEOUT_SECS = 30
@@ -113,6 +114,7 @@ class GiveBlock(smach.State):
             # Place block
             # TODO: rosservice call to place a the next block in the drop off zone
             block_pose = get_pose(userdata.next_block)
+            rospy.ServiceProxy('handover', block_pose)
             rospy.loginfo('Pose is ' + str(block_pose.pose.position.x) + ', '
                           + str(block_pose.pose.position.y))
 
