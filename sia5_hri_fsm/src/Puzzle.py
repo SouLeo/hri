@@ -30,6 +30,16 @@ def create_patterns():
     possible_patterns.append("bgbrby")
     return possible_patterns
 
+def create_starter_patterns():
+    """
+        Function: create_starter_patterns
+        Description: list of blocks people begin with
+        Input: none
+        Output: list of starting blocks
+    """
+    starter_patterns = 'rgyb'
+    return starter_patterns
+
 def compare_pattern(current_pattern, possible_patterns):
     """
         Function: compare_pattern
@@ -48,8 +58,6 @@ def compare_pattern(current_pattern, possible_patterns):
     return new_possibilities
 
 def next_block(rand, possible_patterns, current_pattern, num_tries=None):
-    # TODO: check to see if user has a block in his/her workspace. i.e.
-    # do we need to go to give block?
     """
         Function: next_block
         Description: Chooses which block should be tried next
@@ -80,6 +88,21 @@ def next_block(rand, possible_patterns, current_pattern, num_tries=None):
                 print "possible index out of bound"
                 rospy.logerr('Indexed out of bound in the next_block() function!!!')
                 return '0' # end of sequence. Something went wrong
+
+def is_piece_available(color, starter_pieces):
+    """
+        Function: is_piece_available
+        Description: Checks to see if user has the next block
+        Input: next block color (string) and starter pieces (string)
+        Output: boolean to determine if robot needs to hand it over
+    """
+    if color in starter_pieces:
+        rospy.loginfo('User has needed piece: ' + color)
+        return False
+    else:
+        rospy.loginfo('Robot will handover piece: ' + color)
+        return True
+
 #def main():
 #    possible_patterns = []
 #    possible_patterns = create_patterns()

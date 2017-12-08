@@ -14,7 +14,8 @@
 import rospy
 import smach
 import smach_ros
-from Puzzle import create_patterns, compare_pattern, next_block
+from Puzzle import (create_patterns, create_starter_patterns,
+                    compare_pattern, next_block, is_piece_available)
 from Block import get_pose
 from std_msgs.msg import Bool
 
@@ -23,6 +24,7 @@ TIMEOUT_SECS = 30
 RAND = True
 NUMERRGUESS = 0
 POSSIBLE_PATTERNS = []
+STARTER_PATTERNS = ''
 
 class Observe(smach.State):
     """
@@ -102,9 +104,11 @@ class GiveBlock(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing Give Block State')
-        if userdata.next_block == '':
-            # Don't hand anything over, the user has his/her block
-            print 'lol'
+        handover_block = is_piece_available(userdata.next_block, STARTER_PATTERNS)
+        if not handover_block:
+            # TODO: Don't hand anything over, the user has his/her block
+            rospy.loginfo('No action taken')
+            # remove color from global pattern
         else:
             # Place block
             # TODO: rosservice call to place a the next block in the drop off zone
@@ -148,6 +152,9 @@ def main():
     # Pattern Globals
     global POSSIBLE_PATTERNS
     POSSIBLE_PATTERNS = create_patterns()
+
+    global STARTER_PATTERNS
+    STARTER_PATTERNS = create_starter_patterns()
 
     with SM:
         # Add states to container
