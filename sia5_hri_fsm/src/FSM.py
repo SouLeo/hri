@@ -21,7 +21,7 @@ from Puzzle import (create_patterns, create_starter_patterns,
                     compare_pattern, next_block, is_piece_available)
 from Block import get_pose
 from std_msgs.msg import Bool
-from sia5_hri_fsm.srv import Handover
+import sia5_hri_fsm.srv
 
 SM = None
 TIMEOUT_SECS = 30
@@ -98,7 +98,7 @@ class GiveBlock(smach.State):
     """
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['observe'],
+                             outcomes=['observe', 'trigger_handover'],
                              input_keys=['next_block'],
                              output_keys=['is_block_placed_in'])
 
@@ -109,6 +109,8 @@ class GiveBlock(smach.State):
         if handover_block:
             rospy.loginfo('No action taken')
             STARTER_PATTERNS = STARTER_PATTERNS.replace(userdata.next_block, '')
+            # TODO: rosservice: visually check for updated puzzle
+            return 'observe'
         else:
             block_pose = get_pose(userdata.next_block)
             rospy.loginfo('Pose is ' + str(block_pose.pose.position.x) + ', '
@@ -116,9 +118,8 @@ class GiveBlock(smach.State):
             # TODO: rosservice call to place a the next block in the drop off zone
             # if call works, change outcome to the servicestate for visual check
             # of updated puzzle
-            Handover(block_pose)
-        # TODO: rosservice: visually check for updated puzzle
-        return 'observe'
+            # TODO: rosservice: visually check for updated puzzle
+            return 'trigger_handover'
 
 def is_block_placed_cb(data):
     """
@@ -169,11 +170,13 @@ def main():
                                           'is_pattern_known':'sm_is_pattern_known',
                                           'next_block':'sm_next_block'})
         smach.StateMachine.add('GIVEBLOCK', GiveBlock(),
-                               transitions={'observe':'OBSERVE'},
+                               transitions={'observe':'OBSERVE',
+                                            'trigger_handover':'TRIGGERHANDOVER'},
                                remapping={'is_pattern_known':'sm_is_pattern_known',
                                           'next_block':'sm_next_block',
                                           'is_block_placed_in':'sm_is_block_placed'})
-        smach.StateMachine.add('TRIGGERHANDOVER', ServiceState('Handover', Handover,
+        smach.StateMachine.add('TRIGGERHANDOVER', ServiceState('handover',
+                                                               sia5_hri_fsm.srv.Handover,
                                                                request_slots=['block_pose'],
                                                                response_slots=['handover_bool'],
                                                                outcomes=['observe']),
