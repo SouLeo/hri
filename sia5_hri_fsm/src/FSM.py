@@ -10,10 +10,10 @@
 
     Maintainer: Selma Wanna, slwanna@utexas.edu
 """
-
 import rospy
 import smach
 import smach_ros
+from smach_ros import ServiceState
 from Puzzle import (create_patterns, create_starter_patterns,
                     compare_pattern, next_block, is_piece_available)
 from Block import get_pose
@@ -33,7 +33,6 @@ class Observe(smach.State):
         new block. it will timeout in 30 seconds if no block is placed.
         Regardless of timeout it will enter the state ExaminePuzzle
     """
-
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['examine_puzzle'],
@@ -94,9 +93,6 @@ class GiveBlock(smach.State):
         The GiveBlock state provides the needed block (determined by the
         ExaminePuzzle state) to the shared human-robot shared workspace
     """
-    # TODO: this state involves placing a block in the handover zone, the robot,
-    # this may turn into a service state type or an action state type. Talk w/
-    # Christina
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['observe'],
@@ -105,20 +101,19 @@ class GiveBlock(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing Give Block State')
+        global STARTER_PATTERNS
         handover_block = is_piece_available(userdata.next_block, STARTER_PATTERNS)
-        if not handover_block:
-            # TODO: Don't hand anything over, the user has his/her block
+        if handover_block:
             rospy.loginfo('No action taken')
-            # remove color from global pattern
+            STARTER_PATTERNS = STARTER_PATTERNS.replace(userdata.next_block, '')
+            # TODO: rosservice: visually check for updated puzzle
         else:
-            # Place block
-            # TODO: rosservice call to place a the next block in the drop off zone
             block_pose = get_pose(userdata.next_block)
-            rospy.ServiceProxy('handover', block_pose)
             rospy.loginfo('Pose is ' + str(block_pose.pose.position.x) + ', '
                           + str(block_pose.pose.position.y))
-
-        # TODO: Visually check for updated puzzle
+            # TODO: rosservice: visually check for updated puzzle
+            # TODO: rosservice call to place a the next block in the drop off zone
+            Handover(block_pose)
         return 'observe'
 
 def is_block_placed_cb(data):
@@ -138,12 +133,14 @@ def main():
     """
     # Set up ROS functionality
     rospy.init_node('sia5_fsm')
+    # TODO: verify this starts the cpp service
+    # ROS topics and services
     # ROS publisher and subscribers
     rospy.Subscriber('is_block_placed', Bool, is_block_placed_cb)
 
     # State Machine Setup
     global SM
-    SM = smach.StateMachine(outcomes=[''])
+    SM = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
     rospy.loginfo('sm defined')
 
     # Initialize state machine variables
@@ -173,10 +170,13 @@ def main():
                                remapping={'is_pattern_known':'sm_is_pattern_known',
                                           'next_block':'sm_next_block',
                                           'is_block_placed_in':'sm_is_block_placed'})
-
+        smach.StateMachine.add('TRIGGERHANDOVER', ServiceState('Handover', Handover,
+                                                               request_slots=['block_pose'],
+                                                               response_slots=['handover_bool'],
+                                                               outcomes=['observe']),
+                               transitions={'observe':'OBSERVE'})
     sis = smach_ros.IntrospectionServer('sia5_fsm', SM, '/sm_ROOT')
     sis.start()
-
     SM.execute()
     rospy.spin()
     sis.stop()
