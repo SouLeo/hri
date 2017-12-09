@@ -7,6 +7,9 @@
     1. Observe
     2. ExaminePuzzle
     3. GiveBlock
+    4. TriggerHandover
+    5. TriggerUpdateCheck
+    6. TriggerPatternStatus
 
     Maintainer: Selma Wanna, slwanna@utexas.edu
 """
@@ -106,14 +109,15 @@ class GiveBlock(smach.State):
         if handover_block:
             rospy.loginfo('No action taken')
             STARTER_PATTERNS = STARTER_PATTERNS.replace(userdata.next_block, '')
-            # TODO: rosservice: visually check for updated puzzle
         else:
             block_pose = get_pose(userdata.next_block)
             rospy.loginfo('Pose is ' + str(block_pose.pose.position.x) + ', '
                           + str(block_pose.pose.position.y))
-            # TODO: rosservice: visually check for updated puzzle
             # TODO: rosservice call to place a the next block in the drop off zone
+            # if call works, change outcome to the servicestate for visual check
+            # of updated puzzle
             Handover(block_pose)
+        # TODO: rosservice: visually check for updated puzzle
         return 'observe'
 
 def is_block_placed_cb(data):
@@ -133,8 +137,7 @@ def main():
     """
     # Set up ROS functionality
     rospy.init_node('sia5_fsm')
-    # TODO: verify this starts the cpp service
-    # ROS topics and services
+
     # ROS publisher and subscribers
     rospy.Subscriber('is_block_placed', Bool, is_block_placed_cb)
 
@@ -175,7 +178,7 @@ def main():
                                                                response_slots=['handover_bool'],
                                                                outcomes=['observe']),
                                transitions={'observe':'OBSERVE'})
-    sis = smach_ros.IntrospectionServer('sia5_fsm', SM, '/sm_ROOT')
+    sis = smach_ros.IntrospectionServer('sia5_fsm', SM, '/SM_ROOT')
     sis.start()
     SM.execute()
     rospy.spin()
