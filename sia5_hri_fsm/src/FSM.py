@@ -108,20 +108,19 @@ class GiveBlock(smach.State):
         if handover_block:
             rospy.loginfo('No action taken')
             self.starter_patterns = self.starter_patterns.replace(userdata.next_block, '')
-            # TODO: rosservice: visually check for updated puzzle
-            # change the return statement from observe to the service state
-            # which will check if puzzle updated
+            userdata.is_block_placed_in = True
             return 'observe'
         else:
             block_pose = get_pose(userdata.next_block)
             rospy.loginfo('Pose is ' + str(block_pose.pose.position.x) + ', '
                           + str(block_pose.pose.position.y))
+            userdata.is_block_placed_in = False
             return 'trigger_handover'
 
 def is_block_placed_cb(data):
     """
         Function:    is_block_placed_cb
-        Input:       block placed? (boolean)
+        Input:       is block placed? check button input (boolean)
         Output:      none
     """
     rospy.loginfo('block has been placed!')
@@ -165,8 +164,6 @@ def main():
                                remapping={'is_pattern_known':'sm_is_pattern_known',
                                           'next_block':'sm_next_block',
                                           'is_block_placed_in':'sm_is_block_placed'})
-        # TODO: Change outcome in TRIGGERHANDOVER to the TRIGGERUPDATECHECK
-        # state
         smach.StateMachine.add('TRIGGERHANDOVER', ServiceState('handover',
                                                                sia5_hri_fsm.srv.Handover,
                                                                request_slots=['block_pose'],
@@ -176,13 +173,6 @@ def main():
 # TODO: Fill in correct initialization variables for service states 4 and 5
 # INSERT STATE INTO FLOW: OBSERVE -> TRIGGERPATTERNSTATUS -> EXAMINEPUZZLE
 #        smach.StateMachine.add('TRIGGERPATTERNSTATUS', ServiceState('update',
-#                                                               sia5_hri_fsm.srv.Update,
-#                                                               request_slots=[''],
-#                                                               response_slots=['pattern'],
-#                                                               outcomes=['examine_puzzle']),
-#                               transitions={'examine_puzzle':'EXAMINEPUZZLE'})
-# INSERT STATE INTO FLOW: GIVEBLOCK -> TRIGGERUPDATECHECK -> OBSERVE
-#        smach.StateMachine.add('TRIGGERUPDATECHECK', ServiceState('update',
 #                                                               sia5_hri_fsm.srv.Update,
 #                                                               request_slots=[''],
 #                                                               response_slots=['pattern'],
