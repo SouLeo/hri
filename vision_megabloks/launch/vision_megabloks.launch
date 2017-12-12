@@ -1,0 +1,10 @@
+<launch>
+    <node
+        name        = "PatternDetectionOpenCV"
+        pkg         = "vision_megabloks"
+        type        = "PatternDetectionOpenCV.py"
+
+        respawn     = "false"
+        output      = "screen"
+    />
+</launch>

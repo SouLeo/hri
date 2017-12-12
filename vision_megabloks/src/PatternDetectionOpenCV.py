@@ -98,7 +98,7 @@ class PatternDetectionOpenCV(object):
 
 
 def main():
-    rospy.init_node('vision_megablocks')
+    rospy.init_node('PatternDetectionOpenCV')
     pd = PatternDetectionOpenCV()
     while not rospy.is_shutdown():
         pd.execute()
