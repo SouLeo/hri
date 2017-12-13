@@ -13,7 +13,7 @@ def getColors(colorLetter, colorArray, colorArrayPose, image, kernel1, kernel2):
         upper = np.array(upper, dtype="uint8")
 
         # find the colors within the specified
-        #  boundaries and apply the mask
+        # boundaries and apply the mask
         mask = cv2.inRange(image, lower, upper)
         output = cv2.bitwise_and(image, image, mask=mask)
         imageOut = np.hstack([image, output])
@@ -34,6 +34,11 @@ def getColors(colorLetter, colorArray, colorArrayPose, image, kernel1, kernel2):
             #cv2.imshow('RGB', imageOut)
         return colorArrayPose
 
+def handle_color_sequence(req):
+    # find the most probable color pattern
+    
+    return sequence
+
 class PatternDetectionOpenCV(object):
     """
         This class reports linear MegaBloks patterns
@@ -49,12 +54,12 @@ class PatternDetectionOpenCV(object):
         self.green = []
         self.allPoints = []
         # define the list of boundaries
-        self.red_boundaries = [([0, 5, 80], [15, 20, 255])]
-        self.green_boundaries = [([90, 150, 90], [120, 170, 120])]
-        self.blue_boundaries = [([100, 90, 5], [255, 120, 60])]
-        self.yellow_boundaries = [([45, 170, 200], [80, 195, 240])]
+        self.red_boundaries = [([0, 5, 150], [40, 30, 180])]
+        self.green_boundaries = [([90, 130, 50], [110, 180, 70])]
+        self.blue_boundaries = [([130, 80, 5], [190, 110, 20])]
+        self.yellow_boundaries = [([90, 180, 230], [110, 200, 255])]
 
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(0)
 
     def execute(self):
         # Capture frame-by-frame
@@ -83,22 +88,42 @@ class PatternDetectionOpenCV(object):
         self.green = [i for i in self.green if i[2] >= 180]
         self.green.sort(key=lambda x: x[1])
 
-        allColors = self.blue + self.red + self.yellow + self.green
+        allColors = self.blue + self.red + self.green
         allColors.sort(key=lambda x: x[1])
 
         print "order is: "
         for i, (a, b, c) in enumerate(allColors):
             print str(allColors[i][0]) + ", "
         
+#        firstBlock = [i for i in allColors if i[1] < 750 and i[1] > 700]
+#        secondBlock = [i for i in allColors if i[1] < 800 and i[1] > 755]
+#        thirdBlock = [i for i in allColors if i[1] < 860 and i[1] > 805]
+#        fourthBlock = [i for i in allColors if i[1] < 930 and i[1] > 880]
+#        fifthBlock = [i for i in allColors if i[1] < 960 and i[1] > 940]
+#        sixthBlock = [i for i in allColors if i[1] < 1200 and i [1] > 990]
+
+#        print "first"
+#        print firstBlock
+#        print "second"
+#        print secondBlock
+#        print "third"
+#        print thirdBlock
+#        print "fourth"
+#        print fourthBlock
+#        print "fifth"
+#        print fifthBlock
+#        print "sixth"
+#        print sixthBlock
+
         del self.blue[:]
         del self.red[:]
         del self.yellow[:]
         del self.green[:]
         # Display the resulting frame
 
-
 def main():
-    rospy.init_node('PatternDetectionOpenCV')
+    rospy.init_node('PatternDetectionOpenCV')    
+#    s = rospy.Service('color_pattern', color_sequence, handle_color_sequence)
     pd = PatternDetectionOpenCV()
     while not rospy.is_shutdown():
         pd.execute()

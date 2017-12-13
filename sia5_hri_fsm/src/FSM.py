@@ -33,7 +33,7 @@ class Observe(smach.State):
     """
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['examine_puzzle'],
+                             outcomes=['trigger_pattern'],
                              input_keys=['is_block_placed_in'],
                              output_keys=[''])
         self.timeout_secs = 30
@@ -47,7 +47,7 @@ class Observe(smach.State):
             rospy.loginfo('Timeout Occurred')
         else:
             rospy.loginfo('Block in place')
-        return 'examine_puzzle'
+        return 'trigger_pattern'
 
 class ExaminePuzzle(smach.State):
     """
@@ -58,7 +58,7 @@ class ExaminePuzzle(smach.State):
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['give_next_block'],
-                             input_keys=['is_blocked_placed_out', 'is_pattern_known'],
+                             input_keys=['pattern', 'is_pattern_known'],
                              output_keys=['next_block'])
         self.rand = True
         self.numerrguess = 0
@@ -67,9 +67,7 @@ class ExaminePuzzle(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing Examine Puzzle State')
-        # TODO: rosservice call that reports block sequence into a string and
-        # report into current_pattern
-        current_pattern = 'rr'   # use rosservice that determines what blocks are shown
+        current_pattern = userdata.pattern   # TODO: use rosservice that determines what blocks are shown
         if not userdata.is_pattern_known:
             self.possible_patterns = compare_pattern(current_pattern, self.possible_patterns)
             num_solns = len(self.possible_patterns)
@@ -151,7 +149,7 @@ def main():
     with SM:
         # Add states to container
         smach.StateMachine.add('OBSERVE', Observe(),
-                               transitions={'examine_puzzle':'EXAMINEPUZZLE'},
+                               transitions={'trigger_pattern':'TRIGGERPATTERNSTATUS'},
                                remapping={'is_block_placed_in':'sm_is_block_placed'})
         smach.StateMachine.add('EXAMINEPUZZLE', ExaminePuzzle(),
                                transitions={'give_next_block':'GIVEBLOCK'},
@@ -170,14 +168,12 @@ def main():
                                                                response_slots=['handover_bool'],
                                                                outcomes=['observe']),
                                transitions={'observe':'OBSERVE'})
-# TODO: Fill in correct initialization variables for service states 4 and 5
-# INSERT STATE INTO FLOW: OBSERVE -> TRIGGERPATTERNSTATUS -> EXAMINEPUZZLE
-#        smach.StateMachine.add('TRIGGERPATTERNSTATUS', ServiceState('update',
-#                                                               sia5_hri_fsm.srv.Update,
-#                                                               request_slots=[''],
-#                                                               response_slots=['pattern'],
-#                                                               outcomes=['examine_puzzle']),
-#                               transitions={'examine_puzzle':'EXAMINEPUZZLE'})
+        smach.StateMachine.add('TRIGGERPATTERNSTATUS', ServiceState('pattern',
+                                                               sia5_hri_fsm.srv.Pattern,
+                                                               request_slots=[''],
+                                                               response_slots=['pattern', 'is_pattern_known'],
+                                                               outcomes=['examine_puzzle']),
+                               transitions={'examine_puzzle':'EXAMINEPUZZLE'})
     sis = smach_ros.IntrospectionServer('sia5_fsm', SM, '/SM_ROOT')
     sis.start()
     SM.execute()

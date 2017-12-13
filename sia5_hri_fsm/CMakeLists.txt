@@ -61,6 +61,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    Handover.srv
+   Pattern.srv
  )
 
 ## Generate actions in the 'action' folder
